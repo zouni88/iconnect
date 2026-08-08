@@ -1,0 +1,33 @@
+[package]
+name = "tauri-app"
+version = "0.1.0"
+description = "局域网文件传输 - 手机扫码即可向电脑传文件"
+authors = ["you"]
+edition = "2021"
+
+[lib]
+name = "tauri_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", default-features = false, features = ["wry", "compression", "x11"] }
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.8", features = ["multipart"] }
+qrcode = { version = "0.14", default-features = false, features = ["svg"] }
+local-ip-address = "0.6"
+dirs = "6"
+futures-util = "0.3"
+tokio-util = { version = "0.7", features = ["io"] }
+percent-encoding = "2"
+
+[dev-dependencies]
+# 关闭 default features（common-controls-v6 会导致 Windows 下 cargo test 崩溃，见 tauri#13419）
+tauri = { version = "2", default-features = false, features = ["wry", "compression", "x11", "test"] }
+reqwest = { version = "0.12", default-features = false, features = ["multipart", "json"] }
