@@ -68,6 +68,6 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: "iconnect ${{ github.ref_name }}"
           releaseBody: "局域网内手机与电脑互传文件、图片和文本，无需数据线、无需第三方服务器。\n\n使用教程请参阅项目 README。"
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
