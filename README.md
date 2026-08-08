@@ -151,3 +151,7 @@ iconnect/
 
 **Q：能传多大文件？**
 没有大小限制。大文件以 4MB 分片上传，稳定可靠。
+
+## License
+
+[Apache-2.0](LICENSE)
