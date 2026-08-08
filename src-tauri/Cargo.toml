@@ -1,6 +1,6 @@
 [package]
 name = "tauri-app"
-version = "1.0.0"
+version = "1.0.1"
 description = "局域网文件传输 - 手机扫码即可向电脑传文件"
 authors = ["you"]
 edition = "2021"
