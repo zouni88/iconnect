@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import "./styles.css";
 
@@ -54,14 +54,12 @@ const dirInput = $<HTMLInputElement>("dirInput");
 const startBtn = $<HTMLButtonElement>("startBtn");
 const stopBtn = $<HTMLButtonElement>("stopBtn");
 const openDirBtn = $<HTMLButtonElement>("openDirBtn");
-const historyList = $("historyList");
-const historyCount = $("historyCount");
 const chatList = $("chatList");
 const chatStatus = $("chatStatus");
 const plusBtn = $<HTMLButtonElement>("plusBtn");
 const menuMask = $("menuMask");
 const moreMenu = $("moreMenu");
-const sendTextInput = $<HTMLInputElement>("sendTextInput");
+const sendTextInput = $<HTMLTextAreaElement>("sendTextInput");
 const sendTextBtn = $<HTMLButtonElement>("sendTextBtn");
 
 let currentUrl = "";
@@ -81,7 +79,16 @@ async function init(): Promise<void> {
   openDirBtn.addEventListener("click", openSaveDir);
   sendTextBtn.addEventListener("click", sendTextToPhone);
   sendTextInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") void sendTextToPhone();
+    // Enter 发送，Shift+Enter 换行
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      void sendTextToPhone();
+    }
+  });
+  // 多行输入时自动增高（上限 140px）
+  sendTextInput.addEventListener("input", () => {
+    sendTextInput.style.height = "auto";
+    sendTextInput.style.height = `${Math.min(sendTextInput.scrollHeight, 140)}px`;
   });
 
   // 加号菜单：展开/收起
@@ -102,7 +109,6 @@ async function init(): Promise<void> {
 
   // 实时接收手机发来的事件
   await listen<FileRecord>("file-received", (e) => {
-    addRecord(e.payload);
     addChatMsg("in", {
       kind: "file",
       name: e.payload.name,
@@ -120,7 +126,6 @@ async function init(): Promise<void> {
 
   // 聊天记录按时间先后合并加载（get_outbox / get_texts / get_history 均为最新在前）
   const history = await invoke<FileRecord[]>("get_history").catch(() => []);
-  history.forEach(addRecord);
   const msgs: { dir: "in" | "out"; item: ChatMsg }[] = [];
   const outbox = await invoke<OutboxItem[]>("get_outbox").catch(() => []);
   outbox.forEach((o) => msgs.push({ dir: "out", item: o }));
@@ -175,6 +180,23 @@ function addChatMsg(dir: "in" | "out", item: ChatMsg): void {
   const bubble = document.createElement("div");
   bubble.className = "bubble";
   if (item.kind === "file") {
+    // 图片 / 视频直接在气泡内预览
+    if (item.saved_to && isImage(item.name)) {
+      const img = document.createElement("img");
+      img.className = "msg-preview";
+      img.src = convertFileSrc(item.saved_to);
+      img.alt = item.name;
+      img.loading = "lazy";
+      img.addEventListener("click", () => openPreview(img.src, item.name!));
+      bubble.appendChild(img);
+    } else if (item.saved_to && isVideo(item.name)) {
+      const video = document.createElement("video");
+      video.className = "msg-preview video";
+      video.src = convertFileSrc(item.saved_to);
+      video.controls = true;
+      video.preload = "metadata";
+      bubble.appendChild(video);
+    }
     const name = document.createElement("div");
     name.className = "msg-name";
     name.textContent = item.name;
@@ -208,6 +230,29 @@ function removeEmpty(list: HTMLElement): void {
   const empty = list.querySelector(".empty");
   if (empty) empty.remove();
 }
+
+function isImage(name: string): boolean {
+  return /\.(png|jpe?g|gif|webp|bmp|svg|ico)$/i.test(name);
+}
+
+function isVideo(name: string): boolean {
+  return /\.(mp4|webm|mov|m4v|mkv|avi)$/i.test(name);
+}
+
+// 图片大图预览（点击放大）
+const previewModal = $("previewModal");
+const previewImg = $<HTMLImageElement>("previewImg");
+
+function openPreview(src: string, title: string): void {
+  previewImg.src = src;
+  previewImg.alt = title;
+  previewModal.classList.add("show");
+}
+
+previewModal.addEventListener("click", () => previewModal.classList.remove("show"));
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") previewModal.classList.remove("show");
+});
 
 function formatClock(ms: number): string {
   const d = new Date(ms);
@@ -301,41 +346,11 @@ async function copyUrl(): Promise<void> {
   }
 }
 
-function addRecord(record: FileRecord): void {
-  const empty = historyList.querySelector(".empty");
-  if (empty) empty.remove();
-
-  const li = document.createElement("li");
-  li.className = "history-item";
-  li.innerHTML = `
-    <div class="file-info">
-      <span class="fname"></span>
-      <span class="fmeta"></span>
-    </div>
-    <button class="btn small ghost">打开</button>
-  `;
-  li.querySelector(".fname")!.textContent = record.name;
-  li.querySelector(".fmeta")!.textContent = `${formatSize(record.size)} · ${formatTime(record.time)}`;
-  li.querySelector("button")!.addEventListener("click", () => {
-    void invoke("open_in_explorer", { path: record.saved_to });
-  });
-  historyList.prepend(li);
-
-  const count = historyList.querySelectorAll(".history-item").length;
-  historyCount.textContent = `${count} 个文件`;
-}
-
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-}
-
-function formatTime(ms: number): string {
-  const d = new Date(ms);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
 init();

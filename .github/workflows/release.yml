@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux x64（deb + AppImage）
+          - platform: "ubuntu-22.04"
+            target: x86_64-unknown-linux-gnu
+            bundles: deb,appimage
+          # Linux arm64（deb + AppImage）
+          - platform: "ubuntu-24.04-arm"
+            target: aarch64-unknown-linux-gnu
+            bundles: deb,appimage
+          # Windows x64（NSIS 安装器）
+          - platform: "windows-latest"
+            target: x86_64-pc-windows-msvc
+            bundles: nsis
+          # Windows arm64（NSIS 安装器）
+          - platform: "windows-11-arm"
+            target: aarch64-pc-windows-msvc
+            bundles: nsis
+          # macOS Intel x64（dmg + app）
+          - platform: "macos-15"
+            target: x86_64-apple-darwin
+            bundles: app,dmg
+          # macOS Apple Silicon arm64（dmg + app）
+          - platform: "macos-15-arm64"
+            target: aarch64-apple-darwin
+            bundles: app,dmg
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf
+          sudo apt-get install -y libayatana-appindicator3-dev || sudo apt-get install -y libappindicator3-dev
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "iconnect ${{ github.ref_name }}"
+          releaseBody: "局域网内手机与电脑互传文件、图片和文本，无需数据线、无需第三方服务器。\n\n使用教程请参阅项目 README。"
+          releaseDraft: true
+          prerelease: false
+          args: --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}

@@ -303,88 +303,6 @@ main {
   border-radius: 8px;
 }
 
-.btn.ghost {
-  border-color: transparent;
-  background: transparent;
-  color: var(--primary-dark);
-}
-
-/* 传输记录 */
-.history {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.history-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.history-head h2 {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.history-head .count {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.history-list {
-  list-style: none;
-  overflow-y: auto;
-  max-height: 180px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 4px;
-  background: var(--bg);
-}
-
-.history-list .empty {
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-  padding: 24px 0;
-}
-
-.history-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: var(--card);
-  margin-bottom: 4px;
-}
-
-.history-item:last-child {
-  margin-bottom: 0;
-}
-
-.history-item .file-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.history-item .fname {
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.history-item .fmeta {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-
 /* ===== 聊天面板（微信风格） ===== */
 .chat-card {
   display: flex;
@@ -524,12 +442,30 @@ main {
   background: #e0e7ff;
 }
 
+.msg-preview {
+  display: block;
+  max-width: 240px;
+  max-height: 180px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: zoom-in;
+  background: #f1f5f9;
+}
+
+.msg-preview.video {
+  cursor: default;
+  object-fit: contain;
+  background: #0f172a;
+}
+
 /* 底部输入栏 */
 .chat-bar {
   flex-shrink: 0;
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   padding: 12px 16px;
   background: var(--card);
@@ -562,21 +498,24 @@ main {
   color: var(--primary-dark);
 }
 
-.chat-bar input {
+.chat-bar textarea {
   flex: 1;
   min-width: 0;
-  height: 38px;
-  padding: 0 14px;
+  height: 64px;
+  max-height: 140px;
+  resize: none;
+  padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
+  line-height: 1.5;
   color: var(--text);
   background: var(--bg);
   outline: none;
 }
 
-.chat-bar input:focus {
+.chat-bar textarea:focus {
   border-color: var(--primary);
   background: #fff;
 }
@@ -669,6 +608,30 @@ main {
 .more-menu .menu-icon.img {
   background: #fce7f3;
   color: #db2777;
+}
+
+/* 图片大图预览 */
+.preview-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.92);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+}
+
+.preview-modal.show {
+  display: flex;
+}
+
+.preview-modal img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 /* 滚动条 */

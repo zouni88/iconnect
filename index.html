@@ -64,16 +64,6 @@
               <button id="stopBtn" class="btn danger" disabled>停止服务</button>
               <button id="openDirBtn" class="btn" disabled>打开文件夹</button>
             </div>
-
-            <div class="history">
-              <div class="history-head">
-                <h2>从手机收到的文件</h2>
-                <span id="historyCount" class="count">0 个</span>
-              </div>
-              <ul id="historyList" class="history-list">
-                <li class="empty">暂无记录</li>
-              </ul>
-            </div>
           </section>
         </aside>
 
@@ -88,7 +78,7 @@
           <div class="chat-bar">
             <div class="menu-mask" id="menuMask"></div>
             <button id="plusBtn" class="plus-btn" type="button" aria-label="更多">+</button>
-            <input id="sendTextInput" type="text" maxlength="10000" placeholder="输入文本，回车发送" />
+            <textarea id="sendTextInput" rows="2" maxlength="10000" placeholder="输入文本，Enter 发送，Shift+Enter 换行"></textarea>
             <button id="sendTextBtn" class="send-btn" type="button">发送</button>
           </div>
           <div class="more-menu" id="moreMenu">
@@ -114,6 +104,9 @@
           </div>
         </section>
       </main>
+    </div>
+    <div id="previewModal" class="preview-modal">
+      <img id="previewImg" alt="预览" />
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
