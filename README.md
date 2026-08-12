@@ -24,6 +24,18 @@
 - 📜 **历史记录**：自动保存接收文件的历史，随时打开所在文件夹
 - 🗂️ **重名自动改名**：同名文件自动追加 `(1)`、`(2)` 序号，不会覆盖
 
+## 应用截图
+
+| 电脑端 · 初始状态 | 电脑端 · 服务运行中 |
+| --- | --- |
+| <img src="screenshots/desktop-idle.png" width="320" alt="电脑端初始状态" /> | <img src="screenshots/desktop-running.png" width="320" alt="电脑端服务运行中，显示二维码" /> |
+
+| 手机端 · 连接页面 | 手机端 · 发送菜单 |
+| --- | --- |
+| <img src="screenshots/mobile.png" width="140" alt="手机端连接页面" /> | <img src="screenshots/mobile-menu.png" width="140" alt="手机端发送菜单" /> |
+
+> 以上为真实运行截图：手机打开浏览器访问电脑显示的局域网地址即可出现手机端页面，扫码连接后即可收发文件与文本。
+
 ## 快速开始
 
 ### 环境要求
@@ -135,7 +147,8 @@ iconnect/
 │   └── assets/mobile/          # 手机端单页（零安装，浏览器直接访问）
 ├── index.html
 ├── package.json
-└── vite.config.ts
+├── vite.config.ts
+└── screenshots/              # 应用截图（README 展示用）
 ```
 
 ## 常见问题
